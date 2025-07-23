@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Key Scenes - Teaser</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+        }
+        .sidebar {
+            background-color: #161625;
+        }
+        .main-content {
+            background-color: #1a1a2e;
+        }
+        .header {
+            background-color: #161625;
+            border-bottom: 1px solid #2a2a3e;
+        }
+        .search-bar {
+            background-color: #2a2a3e;
+        }
+        .search-bar input {
+            background-color: transparent;
+            color: #e0e0e0;
+        }
+        .search-bar input::placeholder {
+            color: #9a9a9a;
+        }
+        .btn-primary {
+            background-color: #6c63ff;
+        }
+        .btn-primary:hover {
+            background-color: #574fd8;
+        }
+        .text-purple-400 {
+            color: #a78bfa;
+        }
+        .bg-purple-900 {
+            background-color: #3b2d6b;
+        }
+        .ring-purple-500 {
+            ring-color: #a855f7;
+        }
+        .appearance-popup {
+            background-color: #2a2a3e;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+        .card {
+             background-color: #2a2a3e;
+             border-radius: 8px;
+             overflow: hidden;
+        }
+        .card-info {
+            background-color: #2a2a3e;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex h-screen">
+<aside class="sidebar w-64 flex-shrink-0 flex flex-col p-4 space-y-6">
+<div class="flex items-center space-x-2 text-2xl font-bold">
+<span class="material-icons text-purple-400">api</span>
+<span>Teaser</span>
+</div>
+<nav class="flex-grow">
+<h3 class="text-xs text-gray-400 font-semibold uppercase mb-2">Assets</h3>
+<ul>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">folder_open</span><span>All Assets</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">movie</span><span>Episodes</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md bg-purple-900 text-white" href="#"><span class="material-icons">vpn_key</span><span>Key Scenes</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">people</span><span>Talent</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">location_on</span><span>Location</span></a></li>
+</ul>
+<h3 class="text-xs text-gray-400 font-semibold uppercase mt-6 mb-2 flex justify-between items-center"><span>Collections</span> <span class="material-icons text-gray-400 cursor-pointer">add</span></h3>
+<ul>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">video_library</span><span>Videos</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">image</span><span>Images</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">audiotrack</span><span>Audio</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">rate_review</span><span>Needs Review</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">check_circle</span><span>Approved</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md text-gray-400 hover:bg-purple-900" href="#"><span class="material-icons">add_circle</span><span>New Collection</span></a></li>
+</ul>
+<h3 class="text-xs text-gray-400 font-semibold uppercase mt-6 mb-2 flex justify-between items-center"><span>Shares</span> <span class="material-icons text-gray-400 cursor-pointer">add</span></h3>
+<ul>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">share</span><span>All Shares (2)</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">cut</span><span>Rough Cut 10/14/24</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-900" href="#"><span class="material-icons">theaters</span><span>Trailer v2</span></a></li>
+<li><a class="flex items-center space-x-2 p-2 rounded-md text-gray-400 hover:bg-purple-900" href="#"><span class="material-icons">add_circle</span><span>New Share</span></a></li>
+</ul>
+</nav>
+<div class="border-t border-gray-700 pt-4">
+<button class="flex items-center space-x-2 p-2 w-full rounded-md hover:bg-purple-900">
+<span class="material-icons">settings</span>
+<span>C2C Connections</span>
+</button>
+<div class="flex items-center justify-between mt-4">
+<div class="flex items-center space-x-2">
+<span class="material-icons text-green-500">wifi</span>
+<span class="text-sm">1 Asset selected • 480 MB</span>
+</div>
+<span class="material-icons text-gray-400">more_horiz</span>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col">
+<header class="header h-16 flex-shrink-0 flex items-center justify-between px-6">
+<div class="flex items-center space-x-4">
+<div class="flex items-center text-sm">
+<a class="hover:text-purple-400" href="#">All Assets</a>
+<span class="material-icons text-gray-500">chevron_right</span>
+<span class="font-semibold">Key Scenes</span>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="search-bar pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-64" placeholder="Search in Key Scenes" type="text"/>
+</div>
+<div class="flex items-center space-x-2">
+<img alt="User avatar 1" class="rounded-full w-8 h-8 border-2 border-purple-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC81F9hP1p2DAHGKxAcFHvhXp0O9kWjYRxolkwVc8uSCS5kiu7s8EOZgEjq3l8JQ6JeiAGWgCQHYh_HiiCqH7xyBOaK6MzWK8d59zkEAMevoa6Nb-AwvRQkBnYxWZoN7O3meUintQkivHO-YXeIITkSbDJl3o8nhN5CKtVIS1COG8cTSvoIDOtAavdXyXrjRBTw4iNre0UMTmiWMqrXPmADt4ph-JkYoJsNS8kOvDXCRI0RWT07gylEk0u11L8bSviFjTTmJiAUkVnM"/>
+<img alt="User avatar 2" class="rounded-full w-8 h-8 border-2 border-purple-900 -ml-3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE82KIrt3T-8wbTlfRTzJ5-5x0AbkLTOen8pqNgoECUYj3eGGsIUTiwlNlYQZjcmj0RyIJ9U8M-cYpoDb6uI6GGvk93gtmQ5U8CFzvQrWh0IN1MBj0RaCx7H84j-ogntPfTwgrx-YQRMXlvps9IkKPnZQBbdrfbGop300K6A1ZqT4SqBOFKBKlYreiCv0NN8zJ4YelFcoo6deW4WboDP1OMhJ0N_pCHPLYO1NBb7gPZrVRQxKCERLOc3fBcrQQ7uD6Nx2Ey_6nWrUA"/>
+</div>
+<div class="relative">
+<span class="absolute -top-1 -right-1 bg-purple-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">39</span>
+<span class="material-icons text-gray-400">notifications</span>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-6">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center space-x-4">
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span class="material-icons text-lg">tune</span>
+<span>Appearance</span>
+</button>
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span class="material-icons text-lg">view_list</span>
+<span>Fields</span>
+</button>
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span>Sorted by</span> <span class="font-semibold">Date Uploaded</span>
+<span class="material-icons text-lg">arrow_downward</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+<div class="relative">
+<div class="card">
+<div class="relative">
+<img alt="Person on a bench in a hallway" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoWBTixtRpaJxYiCGQj1z9F_PIvpUAJl9wKYzcvGwEeBkjxa2gCGjEOJLp6DUIqtA61DfEtcxjnJmk3UOmdLzxwCGO8K5G03SPH01k1QZHEV3-MjUKS0VHNsvs14obOJRxaXXO8jEPsabHFGeFbYjJvRi3xVc_yuAVNeOFBVU9wAlsiiypOgSgQ7DFRbOIkApaps4JylTNp_urP0Y-FWmvOjETfU-5yK2L1LessH8Zv4h-Ao_ksFCk_QSg3JkUT3MlI4z6x3yiTHBw"/>
+<span class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">00:08</span>
+</div>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">DRP_A007TQ_V1_0085.mov</h4>
+<p class="text-sm text-gray-400">Becca Dobyns • Oct 14th, 2024</p>
+</div>
+</div>
+<div class="appearance-popup absolute top-0 left-0 mt-12 ml-2 w-64 rounded-lg p-4 z-10 text-sm">
+<div class="flex items-center space-x-2 mb-4">
+<input class="form-checkbox h-4 w-4 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-purple-500" id="visibility" type="checkbox"/>
+<label for="visibility">Visible to only you</label>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block mb-2 font-medium">Card Size</label>
+<div class="flex space-x-2">
+<button class="w-full py-1 rounded bg-gray-700">S</button>
+<button class="w-full py-1 rounded bg-purple-600 text-white">M</button>
+<button class="w-full py-1 rounded bg-gray-700">L</button>
+</div>
+</div>
+<div>
+<label class="block mb-2 font-medium">Aspect Ratio</label>
+<div class="flex space-x-2">
+<button class="w-full py-1 rounded bg-gray-700 flex items-center justify-center"><span class="material-icons text-lg">square</span></button>
+<button class="w-full py-1 rounded bg-purple-600 text-white flex items-center justify-center"><span class="material-icons text-lg">rectangle</span></button>
+</div>
+</div>
+<div>
+<label class="block mb-2 font-medium">Thumbnail Scale</label>
+<div class="flex items-center space-x-2">
+<span>Fit</span>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-purple-600 cursor-pointer" for="toggle"></label>
+</div>
+<span>Fill</span>
+</div>
+<style>
+                                     .toggle-checkbox:checked { right: 0; border-color: #6c63ff; }
+                                    .toggle-checkbox:checked + .toggle-label { background-color: #6c63ff; }
+                                </style>
+</div>
+<div>
+<label class="block mb-2 font-medium">Show Card Info</label>
+<div class="flex items-center space-x-2">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle2" name="toggle2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-purple-600 cursor-pointer" for="toggle2"></label>
+</div>
+</div>
+</div>
+<div>
+<label class="block mb-2 font-medium">Titles</label>
+<select class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
+<option>1 Line</option>
+</select>
+</div>
+<div>
+<label class="block mb-2 font-medium">Flatten Folders</label>
+<div class="flex items-center space-x-2">
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle3" name="toggle3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-purple-600 cursor-pointer" for="toggle3"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<img alt="Water bottle with Dryp logo in a snowy environment" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvlVE3inuIO4Z0mj6dbUgDg5Xc1k5pBucQsHN_oYJCUYkU9e7bWHN9S8RGWCuxWCwisR85DWiSJrH5750vPNxHDjHE0HWH5GcSgi-CDeNth0efODEIaTcVkWvk3oPYi-Mav3zlMQZMg-I6IwHhcyuc8L0ziFlErsNgRynt8EPQBd63u1w1Wi6xe81asGqvQusOofewjJzUAMRFTmCifdidBIq50jnSWUOTsmmi2OHtybQmzTHeRpEOXeYpSkAY8YCuYUVSMJZP81Ri"/>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">DRP_Environment_Test.psd</h4>
+<p class="text-sm text-gray-400">Elliot Coakley • Oct 14th, 2024</p>
+</div>
+</div>
+<div class="card">
+<img alt="Close-up of a woman's face with Dryp logo" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1x18DeIle-zqADLnAKKNq_I7vq5SZdFNcTuFa3cvubs1oBU_tG_56pMsPpdgXzuuFWG_nmVEQ_iTEavYTTtpTeDy0cgsHWWWagnXAocP953OXGRMlGac7WZLdW_eoa9-MstE1ba4Vg22oZcjlnaSdiElJUncWaxKvpWlUbEdvR5d9iDehw2egyF30Meod_HXp2rsU17hfhbgEmnpUOr-2mybSr59saiayWyBl4j-GZE9Q1bGlXPIjRvvngqT2AV6wPl0xmAlrE9gl"/>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">DRP_Supers_RoughCut.aep</h4>
+<p class="text-sm text-gray-400">Eric Atwell • Oct 14th, 2024</p>
+</div>
+</div>
+<div class="card">
+<div class="relative">
+<img alt="Woman on a treadmill with a timer overlay" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy30FGxQe0VWqgBTTYBcATw8f4oRpqun-xSYQR1pJKC48VMQv109BLj0rw-J_EeNiGDN2uhII9suTTMREDdix76lacd8VJkYowMcty11qitVq32nv9JYFmnUhXUawvfTpkdS_xs4u9p8dxcSHIkRW4_a08yBOPFNCpI2kK8higjeQzcJPkj1WWeqOegn6a9A_-tZNP2w3SNloA5_20ILqpfR3-MkShB2B5WdCZRtOflL1A_5JRu3HNRvTrFV9OTYImC85FLJHfRw_3"/>
+<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
+<span class="text-white text-4xl font-bold">05:01</span>
+</div>
+</div>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">DRP_NationalSpot_R3.prproj</h4>
+<p class="text-sm text-gray-400">Sandra Lucille • Oct 14th, 2024</p>
+</div>
+</div>
+<div class="card hidden md:block">
+<div class="bg-gray-700 w-full h-48"></div>
+<div class="p-3">
+<div class="bg-gray-600 h-4 w-3/4 rounded mb-2"></div>
+<div class="bg-gray-600 h-3 w-1/2 rounded"></div>
+</div>
+</div>
+<div class="card">
+<img alt="Man looking at a screen in a dark room" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5j8GjFlh2HbR1RqDDiQ62FENmwR-IPf3NURADRo8T3wu0iMz3rH9qfFFy5WpVShp_9s7aj8-6iegffZFE6RwXhcspyW572DTW8lTZ2OTXIrkjgQdeeI-kb3wpsbdRNq80kRm_Lp46XLltAAD9s1d0pE6zJBQFJ_d12rM3-gFYQ5tbqzqxEVkTgMflKKlSfzmppQs-QQg_9edXYynMETl23ZOtaU--ht0Q-bBfvUGfJp1HAIEdEUREaBVE91QBehn5nLrHoSrSFxjS"/>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">DRP_Launch_Trailer_v1.mov</h4>
+<p class="text-sm text-gray-400">Alexandre Pires • Oct 13th, 2024</p>
+</div>
+</div>
+<div class="card">
+<img alt="Close-up of a stopwatch" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMC10I6D6J1SK3IuzXHpeE80MVoASxQJuSN8r47whjrT5NZVfbbTr0zCykz680iH1tTF5eB_JKnE8VHIwoiOybBJj5OEv-dQZ5v0G5P3PC8cSDRBeObpTH6hjYc074lQ8gw81124EjnfTVBr80T-RXfHYceKg4F7YFeGckT9qFReTXSHy_T6DjkLQEb05KB5MJYk0pNbtWcNzujjAQh_NR2x_hawatSKShDYE66zdXjR0POw-x2pftj3K8pJs8PeY62K0TEJhtAtme"/>
+<div class="p-3 card-info">
+<h4 class="font-semibold truncate">Stopwatch_B-Roll_01.mp4</h4>
+<p class="text-sm text-gray-400">Becca Dobyns • Oct 13th, 2024</p>
+</div>
+</div>
+</div>
+</div>
+<footer class="h-14 flex-shrink-0 flex items-center justify-between px-6 border-t border-gray-700">
+<div></div>
+<div class="flex items-center space-x-2">
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span class="material-icons text-lg">drive_file_move</span>
+<span>Move to</span>
+</button>
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span class="material-icons text-lg">share</span>
+<span>Share</span>
+</button>
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900">
+<span class="material-icons text-lg">file_download</span>
+<span>Download</span>
+</button>
+<button class="flex items-center space-x-2 px-3 py-1.5 rounded-md border border-gray-600 hover:bg-purple-900 text-red-400">
+<span class="material-icons text-lg">delete</span>
+<span>Delete</span>
+</button>
+</div>
+</footer>
+</main>
+
+</body></html>

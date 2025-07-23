@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Image Testing Environment</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+        .image-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .image-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        .image-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .image-info {
+            padding: 1rem;
+        }
+        .drop-zone {
+            border: 3px dashed #d1d5db;
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s;
+            background: #f9fafb;
+        }
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+        .color-circle {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .color-circle:hover {
+            transform: scale(1.2);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+        }
+        .test-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-error {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+        .status-warning {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background-color: #e5e7eb;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Image Details</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="flex-1">
+                        <img id="modalImage" src="" alt="Preview" class="modal-image rounded-lg">
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <div id="modalMetadata" class="space-y-3">
+                            <!-- Metadata will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-gray-800 mb-4">Complete Image Testing Environment</h1>
+            <p class="text-xl text-gray-600">Comprehensive testing for image loading, display, and processing</p>
+        </header>
+
+        <!-- Test Status Overview -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Test Status Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Images Loaded</div>
+                    <div class="text-2xl font-bold text-blue-600" id="loadedCount">0</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Successful</div>
+                    <div class="text-2xl font-bold text-green-600" id="successCount">0</div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="text-sm text-gray-600">Failed</div>
+                    <div class="text-2xl font-bold text-red-600" id="failedCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Upload Test Images</h2>
+            
+            <div id="dropZone" class="drop-zone">
+                <div class="flex flex-col items-center justify-center">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop Images Here</h3>
+                    <p class="text-gray-500 mb-4">or click to select files</p>
+                    <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                    <button id="selectBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        <i class="fas fa-folder-open mr-2"></i>Select Images
+                    </button>
+                    <p class="text-sm text-gray-400 mt-4">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+                </div>
+            </div>
+            
+            <div id="uploadProgress" class="mt-4 hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">Processing images...</span>
+                    <span id="progressText" class="text-sm text-gray-600">0/0</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="uploadStatus" class="mt-4 text-center"></div>
+        </div>
+
+        <!-- Search and Sort Controls -->
+        <div class="test-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Search & Filter</h2>
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center space-x-2">
+                    <label for="sortBy" class="text-sm font-medium text-gray-700">Sort by:</label>
+                    <select id="sortBy" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <label for="filterTag" class="text-sm font-medium text-gray-700">Filter by tag:</label>
+                    <select id="filterTag" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Tags</option>
+                        <!-- Will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" id="searchInput" placeholder="Search images..." class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm font-medium text-gray-700">Grid Size:</span>
+                    <div class="flex items-center space-x-2 w-48">
+                        <i class="fas fa-th text-gray-500 text-sm"></i>
+                        <input type="range" min="150" max="500" value="300" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="gridSizeSlider">
+                        <i class="fas fa-th-large text-gray-500 text-sm"></i>
+                        <span id="gridSizeValue" class="text-sm text-gray-600 w-12 text-center">300px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Test Results</h2>
+                <div class="flex gap-2">
+                    <button id="clearAll" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Clear All
+                    </button>
+                    <button id="exportResults" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Export Results
+                    </button>
+                </div>
+            </div>
+            
+            <div id="imageGrid" class="image-grid">
+                <div class="col-span-full text-center py-12 text-gray-500">
+                    <i class="fas fa-images text-4xl mb-4"></i>
+                    <p class="text-lg">No images uploaded yet</p>
+                    <p class="text-sm">Upload some images to start testing!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let loadedImages = [];
+        let testResults = {
+            total: 0,
+            successful: 0,
+            failed: 0,
+            errors: []
+        };
+        
+        // Backend configuration
+        const API_BASE_URL = 'http://localhost:8000';
+        let backendConnected = false;
+
+        // DOM elements
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectBtn');
+        const dropZone = document.getElementById('dropZone');
+        const imageGrid = document.getElementById('imageGrid');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const loadedCount = document.getElementById('loadedCount');
+        const successCount = document.getElementById('successCount');
+        const failedCount = document.getElementById('failedCount');
+        const clearAll = document.getElementById('clearAll');
+        const exportResults = document.getElementById('exportResults');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalMetadata = document.getElementById('modalMetadata');
+        const closeModal = document.getElementById('closeModal');
+        const sortBy = document.getElementById('sortBy');
+        const filterTag = document.getElementById('filterTag');
+        const searchInput = document.getElementById('searchInput');
+        const gridSizeSlider = document.getElementById('gridSizeSlider');
+        const gridSizeValue = document.getElementById('gridSizeValue');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            checkBackendConnection();
+        });
+
+        async function checkBackendConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/images`);
+                if (response.ok) {
+                    backendConnected = true;
+                    showBackendStatus('✅ Backend Connected - AI Processing Available', 'success');
+                    loadExistingImages();
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                backendConnected = false;
+                showBackendStatus('⚠️ Backend Disconnected - Using Browser-Only Mode', 'warning');
+                console.warn('Backend not available:', error.message);
+            }
+        }
+
+        function showBackendStatus(message, type) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-badge status-${type} mb-4`;
+            statusDiv.innerHTML = `<i class="fas fa-server mr-2"></i>${message}`;
+            
+            // Insert after the header
+            const header = document.querySelector('header');
+            header.insertAdjacentElement('afterend', statusDiv);
+        }
+
+        async function loadExistingImages() {
+            if (!backendConnected) return;
+            
+            try {
+                showProgress(true);
+                const response = await fetch(`${API_BASE_URL}/api/images`);
+                const existingImages = await response.json();
+                
+                for (const imageData of existingImages) {
+                    const processedImage = {
+                        id: Date.now() + Math.random(),
+                        name: imageData.filename,
+                        size: imageData.size_mb * 1024 * 1024,
+                        type: 'image/' + imageData.filename.split('.').pop().toLowerCase(),
+                        dimensions: imageData.dimensions,
+                        dataUrl: `${API_BASE_URL}${imageData.path}`,
+                        loadSuccess: true,
+                        timestamp: new Date().toISOString(),
+                        // Backend AI data
+                        aiProcessed: true,
+                        caption: imageData.caption,
+                        tags: imageData.tags || [],
+                        allTags: imageData.all_tags || [],
+                        colors: imageData.colors || [],
+                        backendPath: imageData.path
+                    };
+                    
+                    loadedImages.push(processedImage);
+                    testResults.total++;
+                    testResults.successful++;
+                    renderImage(processedImage);
+                }
+                
+                updateStatus();
+                showProgress(false);
+                
+            } catch (error) {
+                console.error('Error loading existing images:', error);
+                showProgress(false);
+            }
+        }
+
+        function setupEventListeners() {
+            selectBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFiles);
+            clearAll.addEventListener('click', clearAllImages);
+            exportResults.addEventListener('click', exportTestResults);
+            closeModal.addEventListener('click', hideModal);
+            
+            // Drag and drop
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+            
+            // Modal close on background click
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal) hideModal();
+            });
+            
+            // Search and sort controls
+            sortBy.addEventListener('change', updateSort);
+            filterTag.addEventListener('change', updateFilter);
+            searchInput.addEventListener('input', updateSearch);
+            gridSizeSlider.addEventListener('input', updateGridSize);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        }
+
+        function handleFiles(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            showProgress(true);
+            testResults.total += files.length;
+            
+            let processedCount = 0;
+            
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    // Use backend processing if connected, otherwise fallback to browser-only
+                    if (backendConnected) {
+                        processImageWithBackend(file, () => {
+                            processedCount++;
+                            updateProgress(processedCount, files.length);
+                            
+                            if (processedCount === files.length) {
+                                showProgress(false);
+                                updateStatus();
+                            }
+                        });
+                    } else {
+                        processImage(file, () => {
+                            processedCount++;
+                            updateProgress(processedCount, files.length);
+                            
+                            if (processedCount === files.length) {
+                                showProgress(false);
+                                updateStatus();
+                            }
+                        });
+                    }
+                } else {
+                    processedCount++;
+                    updateProgress(processedCount, files.length);
+                    
+                    if (processedCount === files.length) {
+                        showProgress(false);
+                        updateStatus();
+                    }
+                }
+            });
+        }
+
+        async function processImageWithBackend(file, callback) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                console.log(`🚀 Uploading ${file.name} to backend for AI processing...`);
+                
+                const response = await fetch(`${API_BASE_URL}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    // Success - create image data with AI metadata
+                    const imageData = {
+                        id: Date.now() + Math.random(),
+                        name: result.filename,
+                        size: file.size,
+                        type: file.type,
+                        dataUrl: `${API_BASE_URL}${result.path}`,
+                        loadSuccess: true,
+                        timestamp: new Date().toISOString(),
+                        // Backend AI processing results
+                        aiProcessed: true,
+                        caption: result.metadata?.caption || 'No caption generated',
+                        tags: result.metadata?.tags || [],
+                        allTags: result.metadata?.all_tags || [],
+                        colors: result.metadata?.colors || [],
+                        backendPath: result.path,
+                        processingTime: Date.now() - Date.now() // Will be calculated properly
+                    };
+                    
+                    loadedImages.push(imageData);
+                    testResults.successful++;
+                    renderImage(imageData);
+                    
+                    console.log(`✅ Successfully processed ${file.name} with AI`);
+                    
+                } else {
+                    // Backend processing failed
+                    const imageData = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        error: result.error || `Backend error: ${response.status}`,
+                        loadSuccess: false,
+                        timestamp: new Date().toISOString(),
+                        aiProcessed: false,
+                        backendError: true
+                    };
+                    
+                    loadedImages.push(imageData);
+                    testResults.failed++;
+                    testResults.errors.push(`${file.name}: ${imageData.error}`);
+                    renderImage(imageData);
+                    
+                    console.error(`❌ Backend processing failed for ${file.name}:`, result.error);
+                }
+                
+            } catch (error) {
+                // Network or other error
+                const imageData = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    error: `Network error: ${error.message}`,
+                    loadSuccess: false,
+                    timestamp: new Date().toISOString(),
+                    aiProcessed: false,
+                    networkError: true
+                };
+                
+                loadedImages.push(imageData);
+                testResults.failed++;
+                testResults.errors.push(`${file.name}: Network error - ${error.message}`);
+                renderImage(imageData);
+                
+                console.error(`🌐 Network error processing ${file.name}:`, error);
+            }
+            
+            callback();
+        }
+
+        function processImage(file, callback) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const img = new Image();
+                
+                img.onload = () => {
+                    // Simulate color extraction
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const colors = extractDominantColors(canvas, ctx);
+                    
+                    const imageData = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        dimensions: `${img.width}x${img.height}`,
+                        dataUrl: e.target.result,
+                        colors: colors,
+                        loadSuccess: true,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    loadedImages.push(imageData);
+                    testResults.successful++;
+                    renderImage(imageData);
+                    callback();
+                };
+                
+                img.onerror = () => {
+                    const imageData = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        error: 'Failed to load image',
+                        loadSuccess: false,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    loadedImages.push(imageData);
+                    testResults.failed++;
+                    testResults.errors.push(`${file.name}: Failed to load`);
+                    renderImage(imageData);
+                    callback();
+                };
+                
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = () => {
+                testResults.failed++;
+                testResults.errors.push(`${file.name}: FileReader error`);
+                callback();
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function extractDominantColors(canvas, ctx) {
+            // Advanced color extraction with distinctness filtering
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const colorMap = new Map();
+            const totalPixels = canvas.width * canvas.height;
+            
+            // Sample every 10th pixel to improve performance
+            let sampledPixelCount = 0;
+            for (let i = 0; i < data.length; i += 40) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const alpha = data[i + 3];
+                
+                if (alpha > 128) { // Only consider non-transparent pixels
+                    // Quantize colors to reduce similar variations
+                    const quantizedR = Math.round(r / 16) * 16;
+                    const quantizedG = Math.round(g / 16) * 16;
+                    const quantizedB = Math.round(b / 16) * 16;
+                    const color = `rgb(${quantizedR},${quantizedG},${quantizedB})`;
+                    colorMap.set(color, (colorMap.get(color) || 0) + 1);
+                    sampledPixelCount++;
+                }
+            }
+            
+            // Get initial color candidates
+            const colorCandidates = Array.from(colorMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([color, count]) => {
+                    const percentage = ((count / sampledPixelCount) * 100).toFixed(1);
+                    const estimatedPixels = Math.round((count / sampledPixelCount) * totalPixels);
+                    return {
+                        color: color,
+                        count: count,
+                        estimatedPixels: estimatedPixels,
+                        percentage: percentage,
+                        hex: rgbToHex(color),
+                        rgb: parseRgb(color)
+                    };
+                });
+            
+            // Filter for distinct colors using color distance
+            const distinctColors = [];
+            const minColorDistance = 80; // Minimum color difference threshold
+            
+            for (const candidate of colorCandidates) {
+                let isDistinct = true;
+                
+                // Check if this color is too similar to already selected colors
+                for (const selected of distinctColors) {
+                    const distance = calculateColorDistance(candidate.rgb, selected.rgb);
+                    if (distance < minColorDistance) {
+                        isDistinct = false;
+                        // Merge similar colors by adding counts to the more dominant one
+                        selected.count += candidate.count;
+                        selected.estimatedPixels += candidate.estimatedPixels;
+                        selected.percentage = ((selected.count / sampledPixelCount) * 100).toFixed(1);
+                        break;
+                    }
+                }
+                
+                if (isDistinct) {
+                    distinctColors.push(candidate);
+                }
+                
+                // Stop when we have 5 distinct colors
+                if (distinctColors.length >= 5) break;
+            }
+            
+            return distinctColors.sort((a, b) => b.count - a.count);
+        }
+        
+        function parseRgb(rgbString) {
+            const match = rgbString.match(/rgb\((\d+),(\d+),(\d+)\)/);
+            return match ? {
+                r: parseInt(match[1]),
+                g: parseInt(match[2]),
+                b: parseInt(match[3])
+            } : { r: 0, g: 0, b: 0 };
+        }
+        
+        function calculateColorDistance(rgb1, rgb2) {
+            // Calculate Euclidean distance in RGB space
+            const dr = rgb1.r - rgb2.r;
+            const dg = rgb1.g - rgb2.g;
+            const db = rgb1.b - rgb2.b;
+            return Math.sqrt(dr * dr + dg * dg + db * db);
+        }
+
+        function rgbToHex(rgb) {
+            const match = rgb.match(/rgb\((\d+),(\d+),(\d+)\)/);
+            if (!match) return '#000000';
+            
+            const r = parseInt(match[1]);
+            const g = parseInt(match[2]);
+            const b = parseInt(match[3]);
+            
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function renderImage(imageData) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.onclick = () => showModal(imageData);
+            
+            if (imageData.loadSuccess) {
+                const colorsHtml = imageData.colors.map(color => 
+                    `<div class="color-circle" style="background-color: ${color.hex}" title="${color.hex}"></div>`
+                ).join('');
+                
+                card.innerHTML = `
+                    <img src="${imageData.dataUrl}" alt="${imageData.name}" loading="lazy">
+                    <div class="image-info">
+                        <h3 class="font-semibold text-gray-900 truncate mb-2">${imageData.name}</h3>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div><strong>Size:</strong> ${formatFileSize(imageData.size)}</div>
+                            <div><strong>Dimensions:</strong> ${imageData.dimensions}</div>
+                            <div><strong>Format:</strong> ${imageData.type}</div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-sm font-medium text-gray-700 mb-2">Dominant Colors:</div>
+                            <div class="flex flex-wrap">${colorsHtml}</div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="status-badge status-success">
+                                <i class="fas fa-check mr-1"></i>Loaded Successfully
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="h-64 bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
+                    </div>
+                    <div class="image-info">
+                        <h3 class="font-semibold text-gray-900 truncate mb-2">${imageData.name}</h3>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div><strong>Size:</strong> ${formatFileSize(imageData.size)}</div>
+                            <div><strong>Format:</strong> ${imageData.type}</div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="status-badge status-error">
+                                <i class="fas fa-times mr-1"></i>Failed to Load
+                            </span>
+                        </div>
+                        <div class="mt-2 text-sm text-red-600">${imageData.error}</div>
+                    </div>
+                `;
+            }
+            
+            // Clear placeholder if this is the first image
+            if (imageGrid.children.length === 1 && imageGrid.children[0].textContent.includes('No images')) {
+                imageGrid.innerHTML = '';
+            }
+            
+            imageGrid.appendChild(card);
+        }
+
+        function showModal(imageData) {
+            modalImage.src = imageData.dataUrl;
+            
+            let metadataHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-2">File Information</h4>
+                        <div class="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
+                            <div><strong>Name:</strong> ${imageData.name}</div>
+                            <div><strong>Size:</strong> ${formatFileSize(imageData.size)}</div>
+                            <div><strong>Type:</strong> ${imageData.type}</div>
+                            ${imageData.dimensions ? `<div><strong>Dimensions:</strong> ${imageData.dimensions}</div>` : ''}
+                            <div><strong>Loaded:</strong> ${new Date(imageData.timestamp).toLocaleString()}</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (imageData.colors && imageData.colors.length > 0) {
+                const colorsHtml = imageData.colors.map((color, index) => `
+                    <div class="flex items-center space-x-2">
+                        <div class="color-circle" style="background-color: ${color.hex}"></div>
+                        <div class="text-sm">
+                            <div class="font-medium">${color.hex}</div>
+                            <div class="text-gray-500">${color.count} pixels (${color.percentage}% of sampled pixels, estimated ${color.estimatedPixels} pixels)</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                metadataHtml += `
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Dominant Colors</h4>
+                        <div class="space-y-2">${colorsHtml}</div>
+                    </div>
+                `;
+            }
+            
+            if (imageData.aiProcessed) {
+                metadataHtml += `
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-2">AI-Generated Metadata</h4>
+                        <div class="space-y-2">
+                            <div class="text-sm">
+                                <div class="font-medium">Caption:</div>
+                                <div class="text-gray-500">${imageData.caption}</div>
+                            </div>
+                            <div class="text-sm">
+                                <div class="font-medium">Tags:</div>
+                                <div class="text-gray-500">${imageData.tags.join(', ')}</div>
+                            </div>
+                            <div class="text-sm">
+                                <div class="font-medium">All Tags:</div>
+                                <div class="text-gray-500">${imageData.allTags.map(tag => `${tag.tag} (${tag.percentage}%)`).join(', ')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            metadataHtml += '</div>';
+            modalMetadata.innerHTML = metadataHtml;
+            imageModal.classList.add('show');
+        }
+
+        function hideModal() {
+            imageModal.classList.remove('show');
+        }
+
+        function showProgress(show) {
+            uploadProgress.classList.toggle('hidden', !show);
+        }
+
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${current}/${total}`;
+        }
+
+        function updateStatus() {
+            loadedCount.textContent = testResults.total;
+            successCount.textContent = testResults.successful;
+            failedCount.textContent = testResults.failed;
+            
+            if (testResults.failed > 0) {
+                uploadStatus.innerHTML = `
+                    <div class="status-badge status-warning">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        ${testResults.successful} successful, ${testResults.failed} failed
+                    </div>
+                `;
+            } else if (testResults.successful > 0) {
+                uploadStatus.innerHTML = `
+                    <div class="status-badge status-success">
+                        <i class="fas fa-check mr-1"></i>
+                        All ${testResults.successful} images loaded successfully!
+                    </div>
+                `;
+            }
+        }
+
+        function clearAllImages() {
+            if (confirm('Clear all test results?')) {
+                loadedImages = [];
+                testResults = { total: 0, successful: 0, failed: 0, errors: [] };
+                imageGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-images text-4xl mb-4"></i>
+                        <p class="text-lg">No images uploaded yet</p>
+                        <p class="text-sm">Upload some images to start testing!</p>
+                    </div>
+                `;
+                updateStatus();
+                uploadStatus.innerHTML = '';
+            }
+        }
+
+        function exportTestResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                summary: testResults,
+                images: loadedImages.map(img => ({
+                    name: img.name,
+                    size: img.size,
+                    type: img.type,
+                    dimensions: img.dimensions,
+                    loadSuccess: img.loadSuccess,
+                    error: img.error,
+                    colorsCount: img.colors ? img.colors.length : 0
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `image-test-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateSort() {
+            const sortByValue = sortBy.value;
+            let sortedImages = loadedImages;
+            
+            switch (sortByValue) {
+                case 'newest':
+                    sortedImages = loadedImages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    break;
+                case 'oldest':
+                    sortedImages = loadedImages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    break;
+                case 'name-asc':
+                    sortedImages = loadedImages.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    sortedImages = loadedImages.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+            }
+            
+            imageGrid.innerHTML = '';
+            sortedImages.forEach(image => renderImage(image));
+        }
+
+        function updateFilter() {
+            const filterTagValue = filterTag.value;
+            let filteredImages = loadedImages;
+            
+            if (filterTagValue !== '') {
+                filteredImages = loadedImages.filter(image => image.tags.includes(filterTagValue));
+            }
+            
+            imageGrid.innerHTML = '';
+            filteredImages.forEach(image => renderImage(image));
+        }
+
+        function updateSearch() {
+            const searchQuery = searchInput.value.toLowerCase().trim();
+            let searchedImages = loadedImages;
+            
+            if (searchQuery !== '') {
+                searchedImages = loadedImages.filter(image => {
+                    // Search in filename
+                    const filenameMatch = image.name.toLowerCase().includes(searchQuery);
+                    
+                    // Search in AI-generated tags
+                    let tagsMatch = false;
+                    if (image.tags && Array.isArray(image.tags)) {
+                        tagsMatch = image.tags.some(tag => {
+                            if (typeof tag === 'string') {
+                                return tag.toLowerCase().includes(searchQuery);
+                            } else if (tag && tag.tag) {
+                                return tag.tag.toLowerCase().includes(searchQuery);
+                            }
+                            return false;
+                        });
+                    }
+                    
+                    // Search in AI-generated caption
+                    let captionMatch = false;
+                    if (image.caption && typeof image.caption === 'string') {
+                        captionMatch = image.caption.toLowerCase().includes(searchQuery);
+                    }
+                    
+                    // Search in all_tags (additional AI tags)
+                    let allTagsMatch = false;
+                    if (image.allTags && Array.isArray(image.allTags)) {
+                        allTagsMatch = image.allTags.some(tag => {
+                            if (typeof tag === 'string') {
+                                return tag.toLowerCase().includes(searchQuery);
+                            } else if (tag && tag.tag) {
+                                return tag.tag.toLowerCase().includes(searchQuery);
+                            }
+                            return false;
+                        });
+                    }
+                    
+                    // Return true if found in any field
+                    return filenameMatch || tagsMatch || captionMatch || allTagsMatch;
+                });
+            }
+            
+            // Clear and re-render filtered images
+            imageGrid.innerHTML = '';
+            if (searchedImages.length === 0 && searchQuery !== '') {
+                imageGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <p class="text-lg">No images found for "${searchQuery}"</p>
+                        <p class="text-sm">Try searching for tags like "woman", "shirt", "clothing" or parts of captions</p>
+                    </div>
+                `;
+            } else if (searchedImages.length === 0) {
+                imageGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-images text-4xl mb-4"></i>
+                        <p class="text-lg">No images uploaded yet</p>
+                        <p class="text-sm">Upload some images to start testing!</p>
+                    </div>
+                `;
+            } else {
+                searchedImages.forEach(image => renderImage(image));
+            }
+        }
+
+        function updateGridSize() {
+            const gridSize = gridSizeSlider.value;
+            gridSizeValue.textContent = `${gridSize}px`;
+            imageGrid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${gridSize}px, 1fr))`;
+        }
+    </script>
+</body>
+</html>

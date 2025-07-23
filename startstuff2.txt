@@ -1,0 +1,41 @@
+cd g:\mcp\mcp-course
+
+python fastimageapp.py
+
+http://localhost:8000/
+
+images host
+http://localhost:8000/api/images
+
+http://localhost:8000/static/fastIndex_BU5_analyze.html
+
+mkdir templates
+move fastIndex.html templates\
+
+Start
+python fastimageapp.py
+
+clip_tagger.py
+
+pip install -r requirements.txt
+
+Can you create a backup directly with the fastimageapp.py, clip_tagger.py and fastindex.html?
+
+g:\mcp\mcp-course\
+├── fastimageapp.py          # Main FastAPI app
+├── clip_tagger.py           # AI processing module
+├── templates/
+│   └── complete-test.html   # Frontend template
+├── static/
+│   └── images/              # Uploaded images (auto-created)
+└── requirements.txt         # Dependencies (optional)
+
+requirements.txt
+pip install fastapi uvicorn torch torchvision transformers pillow scikit-learn numpy
+
+server Startcd g:\mcp\mcp-course
+python -m uvicorn fastimageapp:app --reload --host 0.0.0.0 --port 8000
+
+cd g:\mcp\mcp-course
+python fastimageapp.py
+location: http://localhost:8000/
