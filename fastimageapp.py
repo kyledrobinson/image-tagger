@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from pathlib import Path
+import colorsys
 import json
 import os
 import shutil
@@ -102,6 +103,64 @@ async def list_images(
                     "size_mb": round(stat.st_size / (1024 * 1024), 2),
                     "format": format_name,
                 }
+
+                # Try to load existing colors from XMP sidecar (no AI processing)
+                try:
+                    xmp_path = img_path.with_suffix('.xmp')
+                    if xmp_path.exists():
+                        with open(xmp_path, 'r', encoding='utf-8') as xf:
+                            xmp_text = xf.read()
+                        if 'xmpDM:ColorantSwatchList' in xmp_text:
+                            section = xmp_text.split('xmpDM:ColorantSwatchList', 1)[1].split('</xmpDM:ColorantSwatchList>', 1)[0]
+                            # Find each swatch entry
+                            swatches = re.findall(r'<rdf:li[^>]*>.*?</rdf:li>', section, re.DOTALL)
+                            colors = []
+                            for sw in swatches:
+                                hex_match = re.search(r'xmpDM:value[\s=\"]+[#]?([0-9A-Fa-f]{6})', sw)
+                                perc_match = re.search(r'\((\d+\.?\d*)%\)', sw)
+                                if not hex_match:
+                                    continue
+                                hex_code = '#' + hex_match.group(1).upper()
+                                # Convert to RGB and HLS for shade/temperature inference
+                                r = int(hex_code[1:3], 16)
+                                g = int(hex_code[3:5], 16)
+                                b = int(hex_code[5:7], 16)
+                                h, l, s = colorsys.rgb_to_hls(r/255, g/255, b/255)
+                                h_deg = round(h * 360, 1)
+                                s_pct = round(s * 100, 1)
+                                l_pct = round(l * 100, 1)
+                                # Infer temperature (simple heuristic)
+                                if r > b + 30 and g > b + 30:
+                                    temperature = 'warm'
+                                elif b > r + 30 and (b > g + 10):
+                                    temperature = 'cool'
+                                else:
+                                    temperature = 'neutral'
+                                # Infer shade focusing on gray detect so search works
+                                if l_pct < 15:
+                                    shade = 'black'
+                                elif l_pct > 90:
+                                    shade = 'white'
+                                elif s_pct < 15:
+                                    shade = 'gray'
+                                else:
+                                    shade = 'unknown'
+                                # Percentage if present
+                                percentage = float(perc_match.group(1)) if perc_match else 0.0
+                                colors.append({
+                                    'hex': hex_code,
+                                    'rgb': {'r': r, 'g': g, 'b': b},
+                                    'hsl': {'h': h_deg, 's': s_pct, 'l': l_pct},
+                                    'name': shade if shade in ('black','white','gray') else 'unknown',
+                                    'percentage': percentage,
+                                    'temperature': temperature,
+                                    'shade': shade
+                                })
+                            if colors:
+                                metadata_dict["colors"] = colors
+                except Exception as _e:
+                    # Non-fatal; keep colors empty if parsing fails
+                    pass
                 
                 # Prepare the response
                 image_data = {
@@ -134,11 +193,57 @@ async def list_images(
         filtered_images = []
         for img in images:
             # Search in filename, caption, and tags
+            # Also include color names, shades, hex values, and temperature
+            colors = img["metadata"].get("colors", []) or []
+            color_terms = []
+            for c in colors:
+                name = str(c.get("name", "")).lower()
+                shade = str(c.get("shade", "")).lower()
+                hexv = str(c.get("hex", "")).lower()
+                temp = str(c.get("temperature", "")).lower()
+                perc = c.get("percentage")
+                # Add terms (gate name/shade on percentage to reduce false positives)
+                perc_ok = False
+                try:
+                    if perc is not None and float(perc) >= 1.0:
+                        perc_ok = True
+                except Exception:
+                    pass
+                if name and perc_ok:
+                    color_terms.append(name)
+                if shade and perc_ok:
+                    color_terms.append(shade)
+                if hexv:
+                    color_terms.append(hexv)
+                if temp:
+                    color_terms.append(temp)
+                # Add percentage terms (support queries like "5" and "5%")
+                try:
+                    if perc is not None:
+                        # normalize to one decimal to match typical display like 5.0
+                        perc_float = float(perc)
+                        perc_int = int(round(perc_float))
+                        color_terms.append(str(perc_int))
+                        color_terms.append(f"{perc_int}%")
+                        # also include one-decimal variants if different from int
+                        perc_1 = round(perc_float, 1)
+                        if perc_1 != perc_int:
+                            color_terms.append(str(perc_1))
+                            color_terms.append(f"{perc_1}%")
+                except Exception:
+                    pass
+                # Add grey/gray synonym forms to improve matching
+                for term in [name, shade]:
+                    if term and perc_ok:
+                        color_terms.append(term.replace("gray", "grey"))
+                        color_terms.append(term.replace("grey", "gray"))
+
             searchable_text = (
                 img["filename"].lower() + " " +
                 img["metadata"].get("caption", "").lower() + " " +
                 " ".join(img["metadata"].get("tags", [])).lower() + " " +
-                " ".join(img["metadata"].get("all_tags", [])).lower()
+                " ".join(img["metadata"].get("all_tags", [])).lower() + " " +
+                " ".join(color_terms)
             )
             if search_lower in searchable_text:
                 filtered_images.append(img)

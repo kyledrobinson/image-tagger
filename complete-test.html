@@ -25,7 +25,7 @@
         }
         .image-card img {
             width: 100%;
-            height: 250px;
+            height: var(--thumb-h, 250px); /* thumbnail height follows slider */
             object-fit: cover;
             cursor: pointer;
         }
@@ -45,16 +45,23 @@
             background-color: #eff6ff;
             transform: scale(1.02);
         }
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* replaces circle margin */
+            flex-wrap: nowrap;  /* single line */
+            overflow: hidden;   /* hide overflow if any */
+        }
         .color-circle {
-            width: 2rem;
+            width: 2rem;  /* will be overridden inline to fit */
             height: 2rem;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(0, 0, 0, 0.1);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             display: inline-block;
-            margin: 0.25rem;
             cursor: pointer;
-            transition: transform 0.2s;
+            flex: 0 0 auto;     /* fixed-size items */
+            transition: transform 0.15s, width 0.15s, height 0.15s;
         }
         .color-circle:hover {
             transform: scale(1.2);
@@ -91,8 +98,8 @@
         .test-section {
             background: white;
             border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 1.5rem; /* unified section padding */
+            margin-bottom: 1rem; /* unified vertical rhythm */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         .status-badge {
@@ -129,9 +136,16 @@
             background: linear-gradient(90deg, #3b82f6, #1d4ed8);
             transition: width 0.3s ease;
         }
+        /* Compact variant aligned to global rhythm */
+        .compact-section { padding: 1rem; }
+        .drop-zone.compact { padding: 1rem; }
     </style>
-</head>
-<body class="bg-gray-50 min-h-screen">
+  </head>
+  <body class="bg-gray-100">
+    <script>
+      // Toggleable debug for search term construction
+      window.DEBUG_SEARCH = false;
+    </script>
     <!-- Image Modal -->
     <div id="imageModal" class="modal">
         <div class="modal-content">
@@ -156,65 +170,68 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <header class="text-center mb-8">
-            <h1 class="text-5xl font-bold text-gray-800 mb-4">Complete Image Testing Environment</h1>
-            <p class="text-xl text-gray-600">Comprehensive testing for image loading, display, and processing</p>
+    <div class="container mx-auto px-4 py-4 max-w-7xl">
+        <header class="text-center mb-4">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Complete Image Testing Environment</h1>
+            <p class="text-lg text-gray-600">Comprehensive testing for image loading, display, and processing</p>
         </header>
 
-        <!-- Test Status Overview -->
-        <div class="test-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Test Status Overview</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="text-sm text-gray-600">Images Loaded</div>
-                    <div class="text-2xl font-bold text-blue-600" id="loadedCount">0</div>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="text-sm text-gray-600">Successful</div>
-                    <div class="text-2xl font-bold text-green-600" id="successCount">0</div>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="text-sm text-gray-600">Failed</div>
-                    <div class="text-2xl font-bold text-red-600" id="failedCount">0</div>
+        <!-- Top Panels: Status (1/3) + Upload (2/3) on desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Test Status Overview -->
+            <div class="test-section compact-section h-full lg:col-span-1">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">Test Status Overview</h2>
+                <div class="grid grid-cols-1 gap-2">
+                    <div class="bg-gray-50 p-2.5 rounded-lg">
+                        <div class="text-xs text-gray-600">Images Loaded</div>
+                        <div class="text-xl font-bold text-blue-600" id="loadedCount">0</div>
+                    </div>
+                    <div class="bg-gray-50 p-2.5 rounded-lg">
+                        <div class="text-xs text-gray-600">Successful</div>
+                        <div class="text-xl font-bold text-green-600" id="successCount">0</div>
+                    </div>
+                    <div class="bg-gray-50 p-2.5 rounded-lg">
+                        <div class="text-xs text-gray-600">Failed</div>
+                        <div class="text-xl font-bold text-red-600" id="failedCount">0</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Upload Section -->
-        <div class="test-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Upload Test Images</h2>
-            
-            <div id="dropZone" class="drop-zone">
-                <div class="flex flex-col items-center justify-center">
-                    <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop Images Here</h3>
-                    <p class="text-gray-500 mb-4">or click to select files</p>
-                    <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
-                    <button id="selectBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        <i class="fas fa-folder-open mr-2"></i>Select Images
-                    </button>
-                    <p class="text-sm text-gray-400 mt-4">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+            <!-- Upload Section -->
+            <div class="test-section compact-section h-full lg:col-span-2">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">Upload Test Images</h2>
+                
+                <div id="dropZone" class="drop-zone compact" style="min-height: 150px;">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-1.5">Drop Images Here</h3>
+                        <p class="text-gray-500 mb-2 text-sm">or click to select files</p>
+                        <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                        <button id="selectBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
+                            <i class="fas fa-folder-open mr-2"></i>Select Images
+                        </button>
+                        <p class="text-xs text-gray-400 mt-2">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+                    </div>
                 </div>
+                
+                <div id="uploadProgress" class="mt-4 hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Processing images...</span>
+                        <span id="progressText" class="text-sm text-gray-600">0/0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div id="uploadStatus" class="mt-4 text-center"></div>
             </div>
-            
-            <div id="uploadProgress" class="mt-4 hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm text-gray-600">Processing images...</span>
-                    <span id="progressText" class="text-sm text-gray-600">0/0</span>
-                </div>
-                <div class="progress-bar">
-                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
-                </div>
-            </div>
-            
-            <div id="uploadStatus" class="mt-4 text-center"></div>
         </div>
 
         <!-- Search and Sort Controls -->
-        <div class="test-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Search & Filter</h2>
-            <div class="flex flex-wrap gap-4 items-center">
+        <div class="test-section compact-section mt-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Search & Filter</h2>
+            <div class="flex flex-wrap gap-3 items-center">
                 <div class="flex items-center space-x-2">
                     <label for="sortBy" class="text-sm font-medium text-gray-700">Sort by:</label>
                     <select id="sortBy" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
@@ -222,6 +239,8 @@
                         <option value="oldest">Oldest First</option>
                         <option value="name-asc">Name (A-Z)</option>
                         <option value="name-desc">Name (Z-A)</option>
+                        <option value="primary-asc">Primary Color (A-Z)</option>
+                        <option value="primary-desc">Primary Color (Z-A)</option>
                     </select>
                 </div>
                 
@@ -234,37 +253,56 @@
                 </div>
                 
                 <div class="flex-1 min-w-[200px]">
-                    <input type="text" id="searchInput" placeholder="Search images..." class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="searchInput" placeholder="Search images..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2">
+                    <label for="filterPrimary" class="text-sm font-medium text-gray-700">Primary color:</label>
+                    <select id="filterPrimary" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Colors</option>
+                        <option value="black">Black</option>
+                        <option value="white">White</option>
+                        <option value="gray">Gray</option>
+                        <option value="brown">Brown</option>
+                        <option value="red">Red</option>
+                        <option value="orange">Orange</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="green">Green</option>
+                        <option value="cyan">Cyan</option>
+                        <option value="blue">Blue</option>
+                        <option value="purple">Purple</option>
+                        <option value="pink">Pink</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-2">
                     <span class="text-sm font-medium text-gray-700">Grid Size:</span>
-                    <div class="flex items-center space-x-2 w-48">
+                    <div class="flex items-center space-x-2 w-44">
                         <i class="fas fa-th text-gray-500 text-sm"></i>
-                        <input type="range" min="150" max="500" value="300" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="gridSizeSlider">
+                        <input type="range" min="100" max="500" value="150" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="gridSizeSlider">
                         <i class="fas fa-th-large text-gray-500 text-sm"></i>
-                        <span id="gridSizeValue" class="text-sm text-gray-600 w-12 text-center">300px</span>
+                        <span id="gridSizeValue" class="text-sm text-gray-600 w-12 text-center">150px</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Test Results -->
-        <div class="test-section">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Test Results</h2>
+        <div class="test-section compact-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Test Results</h2>
                 <div class="flex gap-2">
-                    <button id="clearAll" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    <button id="clearAll" class="px-3.5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                         <i class="fas fa-trash mr-2"></i>Clear All
                     </button>
-                    <button id="exportResults" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <button id="exportResults" class="px-3.5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                         <i class="fas fa-download mr-2"></i>Export Results
                     </button>
                 </div>
             </div>
             
             <div id="imageGrid" class="image-grid">
-                <div class="col-span-full text-center py-12 text-gray-500">
+                <div class="col-span-full text-center py-6 text-gray-500">
                     <i class="fas fa-images text-4xl mb-4"></i>
                     <p class="text-lg">No images uploaded yet</p>
                     <p class="text-sm">Upload some images to start testing!</p>
@@ -307,14 +345,21 @@
         const closeModal = document.getElementById('closeModal');
         const sortBy = document.getElementById('sortBy');
         const filterTag = document.getElementById('filterTag');
+        const filterPrimary = document.getElementById('filterPrimary');
         const searchInput = document.getElementById('searchInput');
         const gridSizeSlider = document.getElementById('gridSizeSlider');
         const gridSizeValue = document.getElementById('gridSizeValue');
 
         // Initialize
+        let refitColorRows; // debounced refit function
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
+            updateGridSize(); // initialize grid and thumbnail height
             checkBackendConnection();
+            // Prepare debounced refit and run once
+            refitColorRows = debounce(fitAllColorRows, 120);
+            fitAllColorRows();
+            window.addEventListener('resize', () => refitColorRows());
         });
 
         async function checkBackendConnection() {
@@ -323,7 +368,7 @@
                 if (response.ok) {
                     backendConnected = true;
                     showBackendStatus('✅ Backend Connected - AI Processing Available', 'success');
-                    loadExistingImages();
+                    // Intentionally do not auto-load existing images to avoid preloading many files
                 } else {
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -346,42 +391,39 @@
 
         async function loadExistingImages() {
             if (!backendConnected) return;
-            
             try {
                 showProgress(true);
                 const response = await fetch(`${API_BASE_URL}/api/images`);
-                const existingImages = await response.json();
-                
+                const payload = await response.json();
+                const existingImages = Array.isArray(payload) ? payload : (payload.images || []);
                 for (const imageData of existingImages) {
+                    const md = imageData.metadata || {};
                     const processedImage = {
                         id: Date.now() + Math.random(),
                         name: imageData.filename,
-                        size: imageData.size_mb * 1024 * 1024,
-                        type: 'image/' + imageData.filename.split('.').pop().toLowerCase(),
-                        dimensions: imageData.dimensions,
+                        size: (md.size_mb || 0) * 1024 * 1024,
+                        type: (md.format ? md.format : ('image/' + imageData.filename.split('.').pop().toLowerCase())),
+                        dimensions: md.dimensions || '',
                         dataUrl: `${API_BASE_URL}${imageData.path}`,
                         loadSuccess: true,
                         timestamp: new Date().toISOString(),
-                        // Backend AI data
                         aiProcessed: true,
-                        caption: imageData.caption,
-                        tags: imageData.tags || [],
-                        allTags: imageData.all_tags || [],
-                        colors: imageData.colors || [],
-                        backendPath: imageData.path
+                        caption: md.caption || '',
+                        tags: md.tags || [],
+                        allTags: md.all_tags || [],
+                        colors: md.colors || [],
+                        backendPath: imageData.path,
+                        format: md.format || ''
                     };
-                    
                     loadedImages.push(processedImage);
                     testResults.total++;
                     testResults.successful++;
                     renderImage(processedImage);
                 }
-                
                 updateStatus();
-                showProgress(false);
-                
             } catch (error) {
                 console.error('Error loading existing images:', error);
+            } finally {
                 showProgress(false);
             }
         }
@@ -406,6 +448,7 @@
             // Search and sort controls
             sortBy.addEventListener('change', updateSort);
             filterTag.addEventListener('change', updateFilter);
+            filterPrimary.addEventListener('change', updateFilterPrimary);
             searchInput.addEventListener('input', updateSearch);
             gridSizeSlider.addEventListener('input', updateGridSize);
         }
@@ -726,6 +769,65 @@
             }).join('');
         }
 
+        // Primary color helpers (client-side), computed from existing dominant colors
+        function rgbToHslJS(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r,g,b), min = Math.min(r,g,b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) { h = 0; s = 0; }
+            else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h *= 60;
+            }
+            return [h, s, l];
+        }
+        function mapRgbToPrimaryJS(r, g, b) {
+            const [h, s, l] = rgbToHslJS(r, g, b);
+            if (l <= 0.12) return 'black';
+            if (l >= 0.9 && s <= 0.25) return 'white';
+            if (s <= 0.12) return 'gray';
+            if (l < 0.5 && s < 0.6 && (h >= 20 && h < 50)) return 'brown';
+            if (h >= 345 || h < 15) return 'red';
+            if (h >= 15 && h < 35) return 'orange';
+            if (h >= 35 && h < 65) return 'yellow';
+            if (h >= 65 && h < 165) return 'green';
+            if (h >= 165 && h < 200) return 'cyan';
+            if (h >= 200 && h < 255) return 'blue';
+            if (h >= 255 && h < 300) return 'purple';
+            if (h >= 300 && h < 345) return 'pink';
+            return 'gray';
+        }
+        function aggregatePrimaryFromDominantJS(colors) {
+            const buckets = {};
+            (colors || []).forEach(c => {
+                const hex = c.hex || '#000000';
+                const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+                let r=0,g=0,b=0;
+                if (m) { r = parseInt(m[1],16); g = parseInt(m[2],16); b = parseInt(m[3],16); }
+                const name = mapRgbToPrimaryJS(r,g,b);
+                const pct = parseFloat(c.percentage || 0);
+                buckets[name] = (buckets[name] || 0) + (isNaN(pct) ? 0 : pct);
+            });
+            const PRIMARY_ORDER = ["black","white","gray","brown","red","orange","yellow","green","cyan","blue","purple","pink"];
+            const list = Object.entries(buckets).map(([name, pct]) => ({ name, percentage: Math.round(pct*10)/10 }));
+            list.sort((a,b) => b.percentage - a.percentage || PRIMARY_ORDER.indexOf(a.name) - PRIMARY_ORDER.indexOf(b.name));
+            return list;
+        }
+
+        // Compute and cache primary color on image object when needed
+        function getPrimaryColor(image) {
+            if (image.primaryColor) return image.primaryColor;
+            const list = aggregatePrimaryFromDominantJS(image.colors || []);
+            image.primaryColor = (list[0] && list[0].name) ? list[0].name : '';
+            return image.primaryColor;
+        }
+
         function renderImage(imageData) {
             const card = document.createElement('div');
             card.className = 'image-card';
@@ -742,12 +844,13 @@
                         <h3 class="font-semibold text-gray-900 truncate mb-2">${imageData.name}</h3>
                         <div class="text-sm text-gray-600 space-y-1">
                             <div><strong>Size:</strong> ${formatFileSize(imageData.size)}</div>
-                            <div><strong>Dimensions:</strong> ${imageData.dimensions}</div>
-                            <div><strong>Format:</strong> ${imageData.type}</div>
+                            <div><strong>Type:</strong> ${imageData.type}</div>
+                            ${imageData.dimensions ? `<div><strong>Dimensions:</strong> ${imageData.dimensions}</div>` : ''}
+                            <div><strong>Loaded:</strong> ${new Date(imageData.timestamp).toLocaleString()}</div>
                         </div>
                         <div class="mt-3">
                             <div class="text-sm font-medium text-gray-700 mb-2">Dominant Colors:</div>
-                            <div class="flex flex-wrap">${colorsHtml}</div>
+                            <div class="color-row">${colorsHtml}</div>
                         </div>
                         <div class="mt-3">
                             <span class="status-badge status-success">
@@ -756,6 +859,17 @@
                         </div>
                     </div>
                 `;
+
+                // Compute and fill missing dimensions asynchronously (helps backend images)
+                if (!imageData.dimensions) {
+                    const tempImg = new Image();
+                    tempImg.onload = () => {
+                        imageData.dimensions = `${tempImg.width}x${tempImg.height}`;
+                        const dimEl = card.querySelector('.dim-text');
+                        if (dimEl) dimEl.innerHTML = `<strong>Dimensions:</strong> ${imageData.dimensions}`;
+                    };
+                    tempImg.src = imageData.dataUrl;
+                }
             } else {
                 card.innerHTML = `
                     <div class="h-64 bg-gray-200 flex items-center justify-center">
@@ -765,7 +879,7 @@
                         <h3 class="font-semibold text-gray-900 truncate mb-2">${imageData.name}</h3>
                         <div class="text-sm text-gray-600 space-y-1">
                             <div><strong>Size:</strong> ${formatFileSize(imageData.size)}</div>
-                            <div><strong>Format:</strong> ${imageData.type}</div>
+                            <div><strong>Type:</strong> ${imageData.type}</div>
                         </div>
                         <div class="mt-3">
                             <span class="status-badge status-error">
@@ -783,6 +897,8 @@
             }
             
             imageGrid.appendChild(card);
+            // Ensure color circles fit on one line for this card
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
         }
 
         function showModal(imageData) {
@@ -819,6 +935,20 @@
                         <div class="space-y-2">${colorsHtml}</div>
                     </div>
                 `;
+
+                // Additional Primary Colors section (computed from dominant colors)
+                const primaryList = aggregatePrimaryFromDominantJS(imageData.colors);
+                if (primaryList.length > 0) {
+                    const primHtml = primaryList.map(pc => `
+                        <span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700 border">${pc.name} ${pc.percentage}%</span>
+                    `).join(' ');
+                    metadataHtml += `
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Primary Colors</h4>
+                            <div class="flex flex-wrap gap-1">${primHtml}</div>
+                        </div>
+                    `;
+                }
             }
             
             if (imageData.aiProcessed) {
@@ -932,11 +1062,16 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${current}/${total}`;
+        }
+
         function updateSort() {
-            const sortByValue = sortBy.value;
-            let sortedImages = loadedImages;
-            
-            switch (sortByValue) {
+            const sortValue = sortBy.value;
+            let sortedImages = [];
+            switch (sortValue) {
                 case 'newest':
                     sortedImages = loadedImages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                     break;
@@ -949,10 +1084,18 @@
                 case 'name-desc':
                     sortedImages = loadedImages.sort((a, b) => b.name.localeCompare(a.name));
                     break;
+                case 'primary-asc':
+                    sortedImages = loadedImages.sort((a, b) => getPrimaryColor(a).localeCompare(getPrimaryColor(b)));
+                    break;
+                case 'primary-desc':
+                    sortedImages = loadedImages.sort((a, b) => getPrimaryColor(b).localeCompare(getPrimaryColor(a)));
+                    break;
+                default:
+                    sortedImages = loadedImages;
             }
-            
             imageGrid.innerHTML = '';
             sortedImages.forEach(image => renderImage(image));
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
         }
 
         function updateFilter() {
@@ -965,6 +1108,25 @@
             
             imageGrid.innerHTML = '';
             filteredImages.forEach(image => renderImage(image));
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
+        }
+
+        function updateFilterPrimary() {
+            const value = (filterPrimary.value || '').toLowerCase();
+            let filtered = loadedImages;
+            if (value !== '') {
+                filtered = loadedImages.filter(img => {
+                    try {
+                        const list = aggregatePrimaryFromDominantJS(img.colors || []);
+                        return list.some(pc => (pc.name || '').toLowerCase() === value && (parseFloat(pc.percentage) || 0) > 0);
+                    } catch (e) {
+                        return getPrimaryColor(img).toLowerCase() === value; // fallback to top primary
+                    }
+                });
+            }
+            imageGrid.innerHTML = '';
+            filtered.forEach(image => renderImage(image));
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
         }
 
         function updateSearch() {
@@ -973,43 +1135,99 @@
             
             if (searchQuery !== '') {
                 searchedImages = loadedImages.filter(image => {
-                    // Search in filename
-                    const filenameMatch = image.name.toLowerCase().includes(searchQuery);
-                    
-                    // Search in AI-generated tags
-                    let tagsMatch = false;
-                    if (image.tags && Array.isArray(image.tags)) {
-                        tagsMatch = image.tags.some(tag => {
-                            if (typeof tag === 'string') {
-                                return tag.toLowerCase().includes(searchQuery);
-                            } else if (tag && tag.tag) {
-                                return tag.tag.toLowerCase().includes(searchQuery);
+                    // Build a combined searchable string including colors
+                    const parts = [];
+                    // filename
+                    if (image.name) parts.push(String(image.name).toLowerCase());
+                    // caption
+                    if (image.caption) parts.push(String(image.caption).toLowerCase());
+                    // tags (strings or objects with .tag)
+                    if (Array.isArray(image.tags)) {
+                        for (const t of image.tags) {
+                            if (typeof t === 'string') parts.push(t.toLowerCase());
+                            else if (t && t.tag) parts.push(String(t.tag).toLowerCase());
+                        }
+                    }
+                    // allTags
+                    if (Array.isArray(image.allTags)) {
+                        for (const t of image.allTags) {
+                            if (typeof t === 'string') parts.push(t.toLowerCase());
+                            else if (t && t.tag) parts.push(String(t.tag).toLowerCase());
+                        }
+                    }
+                    // color terms (names, shades, hex, temperature, percentages)
+                    if (Array.isArray(image.colors)) {
+                        for (const c of image.colors) {
+                            const name = (c.name || '').toLowerCase();
+                            const shade = (c.shade || '').toLowerCase();
+                            const hex = (c.hex || '').toLowerCase();
+                            const temp = (c.temperature || '').toLowerCase();
+                            const perc = c.percentage;
+                            const percOk = (perc !== undefined && perc !== null && !isNaN(perc) && parseFloat(perc) >= 1.0);
+                            // push hex and temperature unconditionally
+                            if (hex) parts.push(hex);
+                            if (temp) parts.push(temp);
+                            // gate name/shade on percentage to reduce noise
+                            if (percOk) {
+                                // Special handling for gray/grey: ensure hex maps to primary gray
+                                const isGrayTerm = (t) => t === 'gray' || t === 'grey';
+                                let allowGray = true;
+                                if (hex && (isGrayTerm(name) || isGrayTerm(shade))) {
+                                    const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+                                    if (m) {
+                                        const r = parseInt(m[1], 16), g = parseInt(m[2], 16), b = parseInt(m[3], 16);
+                                        allowGray = (mapRgbToPrimaryJS(r, g, b) === 'gray');
+                                    }
+                                }
+                                if (name && (allowGray || !isGrayTerm(name))) {
+                                    parts.push(name);
+                                    parts.push(name.replace('gray','grey'));
+                                    parts.push(name.replace('grey','gray'));
+                                }
+                                if (shade && (allowGray || !isGrayTerm(shade))) {
+                                    parts.push(shade);
+                                    parts.push(shade.replace('gray','grey'));
+                                    parts.push(shade.replace('grey','gray'));
+                                }
                             }
-                            return false;
-                        });
-                    }
-                    
-                    // Search in AI-generated caption
-                    let captionMatch = false;
-                    if (image.caption && typeof image.caption === 'string') {
-                        captionMatch = image.caption.toLowerCase().includes(searchQuery);
-                    }
-                    
-                    // Search in all_tags (additional AI tags)
-                    let allTagsMatch = false;
-                    if (image.allTags && Array.isArray(image.allTags)) {
-                        allTagsMatch = image.allTags.some(tag => {
-                            if (typeof tag === 'string') {
-                                return tag.toLowerCase().includes(searchQuery);
-                            } else if (tag && tag.tag) {
-                                return tag.tag.toLowerCase().includes(searchQuery);
+                            // percentage numeric variants
+                            if (perc !== undefined && perc !== null && !isNaN(perc)) {
+                                const pf = parseFloat(perc);
+                                const pi = Math.round(pf);
+                                parts.push(String(pi));
+                                parts.push(`${pi}%`);
+                                const p1 = Math.round(pf * 10) / 10;
+                                if (p1 !== pi) { parts.push(String(p1)); parts.push(`${p1}%`); }
                             }
-                            return false;
-                        });
+                        }
                     }
-                    
-                    // Return true if found in any field
-                    return filenameMatch || tagsMatch || captionMatch || allTagsMatch;
+                    // also include aggregated primary colors
+                    try {
+                        const primList = aggregatePrimaryFromDominantJS(image.colors || []);
+                        for (const pc of primList) {
+                            const pp = pc.percentage;
+                            const n = (pc.name || '').toLowerCase();
+                            // Only include name when percentage is meaningful to avoid false positives
+                            if (n && pp !== undefined && pp !== null && !isNaN(pp) && parseFloat(pp) > 0.5) {
+                                parts.push(n);
+                                parts.push(n.replace('gray','grey'));
+                                parts.push(n.replace('grey','gray'));
+                            }
+                            if (pp !== undefined && pp !== null && !isNaN(pp)) {
+                                const ppi = Math.round(parseFloat(pp));
+                                parts.push(String(ppi));
+                                parts.push(`${ppi}%`);
+                                const pp1 = Math.round(parseFloat(pp) * 10) / 10;
+                                if (pp1 !== ppi) { parts.push(String(pp1)); parts.push(`${pp1}%`); }
+                            }
+                        }
+                    } catch (e) { /* ignore */ }
+
+                    const combined = parts.filter(Boolean).join(' ');
+                    if (window.DEBUG_SEARCH && /\bgray\b|\bgrey\b/.test(searchQuery)) {
+                        console.log('[DEBUG_SEARCH] Image:', image.name, { parts, combined });
+                    }
+                    return combined.includes(searchQuery);
                 });
             }
             
@@ -1020,7 +1238,7 @@
                     <div class="col-span-full text-center py-12 text-gray-500">
                         <i class="fas fa-search text-4xl mb-4"></i>
                         <p class="text-lg">No images found for "${searchQuery}"</p>
-                        <p class="text-sm">Try searching for tags like "woman", "shirt", "clothing" or parts of captions</p>
+                        <p class="text-sm">Try searching for colors like \"gray 26.2%\", hex like \"#808080\", or tags/captions</p>
                     </div>
                 `;
             } else if (searchedImages.length === 0) {
@@ -1034,13 +1252,53 @@
             } else {
                 searchedImages.forEach(image => renderImage(image));
             }
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
         }
 
         function updateGridSize() {
             const gridSize = gridSizeSlider.value;
             gridSizeValue.textContent = `${gridSize}px`;
             imageGrid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${gridSize}px, 1fr))`;
+            imageGrid.style.setProperty('--thumb-h', `${gridSize}px`);
+            if (typeof refitColorRows === 'function') { refitColorRows(); } else { fitAllColorRows(); }
         }
+
+        function debounce(func, wait = 100) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(this, args);
+                }, wait);
+            };
+        }
+
+        function fitColorRow(row) {
+            if (!row) return;
+            const circles = row.querySelectorAll('.color-circle');
+            const n = circles.length;
+            if (!n) return;
+            const rowStyles = getComputedStyle(row);
+            const gapPx = parseFloat(rowStyles.gap) || 8;
+            const rowWidth = row.clientWidth;
+            const maxSize = 32; // px
+            const minSize = 10; // px
+            const available = Math.max(0, rowWidth - (n - 1) * gapPx);
+            let size = Math.floor(available / n);
+            size = Math.max(minSize, Math.min(maxSize, size));
+            circles.forEach(c => {
+                c.style.width = `${size}px`;
+                c.style.height = `${size}px`;
+            });
+            row.style.flexWrap = 'nowrap';
+        }
+
+        function fitAllColorRows() {
+            const colorRows = document.querySelectorAll('.color-row');
+            colorRows.forEach(fitColorRow);
+        }
+
+        
     </script>
 </body>
 </html>
